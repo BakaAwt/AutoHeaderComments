@@ -38,10 +38,19 @@ JAVA_HEADERCOMMENTS = """/*
 stuLTRdict = {"k": "15", "l": "16", "m": "17", "n": "18", "p": "19", "q": "20", "r": "21", "s": "22", "t": "23", "u": "24", "v": "25", "w": "26", "x": "27", "y": "28", "z": "29"}
 stuIDdict = {v : k for k, v in stuLTRdict.items()}
 
-logging.basicConfig(level=logging.INFO,
-                    filename='output.txt',
-                    filemode='a',
-                    format='%(message)s')
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(message)s')
+
+# 使用FileHandler输出到文件
+fh = logging.FileHandler('log.txt')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+
+# 使用StreamHandler输出到屏幕
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
 
 def convertNumberToLetter(student_id) -> str:
     """
@@ -165,6 +174,8 @@ def run(code_type, code_lang, folder, force_replace, simulate) -> bool:
                             f.write(old)
 
 def main():
+    logger.addHandler(ch)
+    logger.addHandler(fh)
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--type", required=True, help="specifies the code type")
     parser.add_argument("-l", "--lang", required=True, help="specifies the code language")
