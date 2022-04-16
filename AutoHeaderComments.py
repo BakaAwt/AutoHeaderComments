@@ -82,6 +82,12 @@ def get_file_header(file_path, lines):
             file_header += f.readline()
     return file_header
 
+def delete_file_header(file_path, lines):
+    with open(file_path, "r") as f:
+        a = f.readlines()
+    with open(file_path, "w") as f:
+        f.write(''.join(a[lines:]))
+
 def get_comments(file_name, file_path, code_type, code_lang) -> str:
     if code_lang == "Java":
         file_header = JAVA_HEADERCOMMENTS
@@ -152,18 +158,18 @@ def run(code_type, code_lang, folder, force_replace, simulate) -> bool:
                 file_header = get_file_header(os.path.join(file_path, file_name), 9 if code_lang == "C" else 7)
                 comment_exists = re.search(r"\/\*(\s|.)*?\*\/", file_header, re.I)
                 if comment_exists:
+                    original_comments = get_file_header(os.path.join(file_path, file_name), 9 if code_lang == "C" else 7)
+                    logging.info(f"Comments already exist in {file_name}")
                     if force_replace:
-                        logging.info(f"Replacing comment in {file_name}")
-                        logging.info("The original comment is " + get_file_header(os.path.join(file_path, file_name), 9 if code_lang == "C" else 7))
+                        logging.info(f"***Force replacing comment in {file_name}***!")
                         if not simulate:
+                            delete_file_header(os.path.join(file_path, file_name), 9 if code_lang == "C" else 7)
                             with open(os.path.join(file_path, file_name), "r+") as f:
                                 old = f.read()
                                 f.seek(0)
                                 f.write(get_comments(file_name, file_path, code_type, code_lang))
                                 f.write(old)
-                    else:
-                        logging.info(f"Comments already exist in {file_name}")
-                        logging.info("The original comment is " + get_file_header(os.path.join(file_path, file_name), 9 if code_lang == "C" else 7))
+                    logging.info("The original comment is " + original_comments)
                 else:
                     logging.info("Adding comment in " + file_name)
                     if not simulate:
