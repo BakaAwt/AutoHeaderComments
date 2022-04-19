@@ -25,7 +25,7 @@ C_HEADERCOMMENTS = """/*
  Copyright   : COPTLEFT
  Description : *code_type *week_id, Task *task_id
  ============================================================================
- */"""
+ */\n"""
 
 JAVA_HEADERCOMMENTS = """/*
  ============================================================================
@@ -33,7 +33,7 @@ JAVA_HEADERCOMMENTS = """/*
  Author      : *student_id
  Description : *code_type *task_id, Question *question_id, *pure_file_name class
  ============================================================================
- */"""
+ */\n"""
 
 stuLTRdict = {"k": "15", "l": "16", "m": "17", "n": "18", "p": "19", "q": "20", "r": "21", "s": "22", "t": "23", "u": "24", "v": "25", "w": "26", "x": "27", "y": "28", "z": "29"}
 stuIDdict = {v : k for k, v in stuLTRdict.items()}
@@ -107,7 +107,7 @@ def get_comments(file_name, file_path, code_type, code_lang) -> str:
     elif code_lang == "C":
         file_header = C_HEADERCOMMENTS
         # Lab
-        if (code_type == "Lab" and re.search(r"^[A-Z][0-9]+[A-Z][0-9]+[A-Z][0-9]{9}\.c$", file_name, re.I)):
+        if (code_type == "Lab" and re.search(r"^[A-Z][0-9]+[A-Z][0-9]+[A-Z][0-9]{9}(.*)\.c$", file_name, re.I)):
             week_id = re.search(r'W[0-9]+', file_name, re.I).group().replace("w", "W")
             file_header = file_header.replace("*week_id", week_id.replace("W", ""))
             task_id = re.search(r'T[0-9]+', file_name, re.I).group().replace("t", "T")
@@ -116,7 +116,7 @@ def get_comments(file_name, file_path, code_type, code_lang) -> str:
             file_header = file_header.replace("*student_id", convertLetterToNumber(student_id))
             file_header = file_header.replace("*code_type", "Week")
         # Assignment
-        if (code_type == "Assignment" and re.search(r"^[A-Z][0-9]+[A-Z][0-9]+_[A-Z][0-9]{9}\.c$", file_name, re.I)):
+        if (code_type == "Assignment" and re.search(r"^[A-Z][0-9]+[A-Z][0-9]+_[A-Z][0-9]{9}(.*)\.c$", file_name, re.I)):
             week_id = re.search(r'A[0-9]+', file_name, re.I).group().replace("a", "A")
             file_header = file_header.replace("*week_id", week_id.replace("A", ""))
             task_id = re.search(r'T[0-9]+', file_name, re.I).group().replace("t", "T")
