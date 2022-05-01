@@ -123,7 +123,7 @@ def get_comments(file_name, file_path, code_type, code_lang) -> str:
             file_header = file_header.replace("*task_id", task_id.replace("T", ""))
             student_id = re.search(r'[A-Z][0-9]{9}', file_name, re.I).group().replace("r", "R")
             file_header = file_header.replace("*student_id", convertLetterToNumber(student_id))
-            file_header = file_header.replace("*code_type", "Week")
+            file_header = file_header.replace("*code_type", "Assignment")
     file_header = file_header.replace("*file_name", file_name)
     return file_header
 
