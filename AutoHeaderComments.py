@@ -7,6 +7,10 @@
 # Author:       Kirin
 # Date:         2022/04/16
 # --------------------------------------------------------
+# Update:
+# 2020/04/16:   Initial version
+# 2020/05/23:   Add support for Java Project, modify the "simulate" to "test"
+# --------------------------------------------------------
 
 # Import
 
@@ -25,7 +29,7 @@ C_HEADERCOMMENTS = """/*
  Copyright   : COPTLEFT
  Description : *code_type *week_id, Task *task_id
  ============================================================================
- */\n"""
+ */\n\n"""
 
 JAVA_HEADERCOMMENTS = """/*
  ============================================================================
@@ -33,7 +37,7 @@ JAVA_HEADERCOMMENTS = """/*
  Author      : *student_id
  Description : *code_type *task_id, Question *question_id, *pure_file_name class
  ============================================================================
- */\n"""
+ */\n\n"""
 
 stuLTRdict = {"k": "15", "l": "16", "m": "17", "n": "18", "p": "19", "q": "20", "r": "21", "s": "22", "t": "23", "u": "24", "v": "25", "w": "26", "x": "27", "y": "28", "z": "29"}
 stuIDdict = {v : k for k, v in stuLTRdict.items()}
@@ -93,7 +97,7 @@ def get_comments(file_name, file_path, code_type, code_lang) -> str:
         file_header = JAVA_HEADERCOMMENTS
         fetched_info = file_path.replace("\\", "/").split("/")
         for item in fetched_info:
-            txt = re.search(r'Lab[0-9]+_[0-9]{10}|Assignment[0-9]+_[0-9]{10}', item, re.I)
+            txt = re.search(r'Lab[0-9]+_[0-9]{10}|Assignment[0-9]+_[0-9]{10}|Project_[0-9]{10}', item, re.I)
             if hasattr(txt, "group"):
                 infos = txt.group().split("_")
                 file_header = file_header.replace("*code_type", f"{code_type}")
@@ -127,7 +131,7 @@ def get_comments(file_name, file_path, code_type, code_lang) -> str:
     file_header = file_header.replace("*file_name", file_name)
     return file_header
 
-def run(code_type, code_lang, folder, force_replace, simulate) -> bool:
+def run(code_type, code_lang, folder, force_replace, test_run) -> bool:
     # Get the path of the file
     if not code_type:
         logging.error("Please provide the code type!")
@@ -162,7 +166,7 @@ def run(code_type, code_lang, folder, force_replace, simulate) -> bool:
                     logging.info(f"Comments already exist in {file_name}")
                     if force_replace:
                         logging.info(f"***Force replacing comment in {file_name}***!")
-                        if not simulate:
+                        if not test_run:
                             delete_file_header(os.path.join(file_path, file_name), 9 if code_lang == "C" else 7)
                             with open(os.path.join(file_path, file_name), "r+") as f:
                                 old = f.read()
@@ -172,7 +176,7 @@ def run(code_type, code_lang, folder, force_replace, simulate) -> bool:
                     logging.info("The original comment is " + original_comments)
                 else:
                     logging.info("Adding comment in " + file_name)
-                    if not simulate:
+                    if not test_run:
                         with open(os.path.join(file_path, file_name), "r+") as f:
                             old = f.read()
                             f.seek(0)
@@ -186,10 +190,10 @@ def main():
     parser.add_argument("-t", "--type", required=True, help="specifies the code type")
     parser.add_argument("-l", "--lang", required=True, help="specifies the code language")
     parser.add_argument("-f", "--folder", help="specifies the folder the script iterate")
-    parser.add_argument("-fr", "--forcereplace", action='store_true', help="force replace existing comments")
-    parser.add_argument("-s", "--simulate", action='store_true', help="simulation run (does not actually write files)")
+    parser.add_argument("-force", "--forcereplace", action='store_true', help="force replace existing comments")
+    parser.add_argument("-test", "--testrun", action='store_true', help="test run (does not actually write files)")
     args = parser.parse_args()
-    run(args.type, args.lang, args.folder, args.forcereplace, args.simulate)
+    run(args.type, args.lang, args.folder, args.forcereplace, args.testrun)
 
 if __name__ == "__main__":
     main()
