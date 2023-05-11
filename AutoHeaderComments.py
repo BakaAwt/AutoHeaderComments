@@ -7,9 +7,9 @@
 # Author:       Kirin
 # Date:         2022/04/16
 # --------------------------------------------------------
-# Update:
-# 2020/04/16:   Initial version
-# 2020/05/23:   Add support for Java Project, modify the "simulate" to "test"
+# Updates:
+# 2022/04/16:   Initial version
+# 2022/05/23:   Added support for Java Project, changed the "simulate" to "test"
 # --------------------------------------------------------
 
 # Import
@@ -36,6 +36,14 @@ JAVA_HEADERCOMMENTS = """/*
  Name        : *file_name
  Author      : *student_id
  Description : *code_type *task_id, Question *question_id, *pure_file_name class
+ ============================================================================
+ */\n\n"""
+
+OS_HEADERCOMMENTS = """/*
+ ============================================================================
+ Name        : *file_name
+ Author      : *student_id
+ Description : *code_type *exercise_id, part *pure_file_name
  ============================================================================
  */\n\n"""
 
@@ -128,6 +136,23 @@ def get_comments(file_name, file_path, code_type, code_lang) -> str:
             student_id = re.search(r'[A-Z][0-9]{9}', file_name, re.I).group().replace("r", "R")
             file_header = file_header.replace("*student_id", convertLetterToNumber(student_id))
             file_header = file_header.replace("*code_type", "Assignment")
+    elif code_lang == "OS":
+        # Hands-on Exercises
+        # Path Structure: ../COMP3033/Hands-on Exercises/Exercise 1/..
+        # FileName Rule: pure_file_name.extension
+        file_header = OS_HEADERCOMMENTS
+        fetched_info = file_path.replace("\\", "/").split("/")
+        if code_type == "Hands-on Exercises" or code_type.to_lower() == "hoe":
+            code_type = "Hands-on Exercises"
+            for item in fetched_info:
+                txt = re.search(r'Exercise [0-9]+', item)
+                if hasattr(txt, "group"):
+                    file_header = file_header.replace("*exercise_id", txt.group().replace("Exercise ", ""))
+        file_header = file_header.replace("*pure_file_name", file_name.split(".")[0])
+        file_header = file_header.replace("*code_type", code_type)
+
+
+
     file_header = file_header.replace("*file_name", file_name)
     return file_header
 
@@ -151,11 +176,14 @@ def run(code_type, code_lang, folder, force_replace, test_run) -> bool:
     # Iterate through folders to find the .{code_lang} files
     for file_path, _dir_list, file_list in oswalk:
         for file_name in file_list:
-            matched_file = re.search(rf"^(.*)\.{code_lang}$", file_name, re.I)
-            # if code_lang == "Java":
-            #     matched_file = re.match(r"^(.*)\.java$", file_name, re.I)
-            # elif code_lang == "C":
-            #     matched_file = re.match(r"^[A-Z][0-9]+[A-Z][0-9]+[A-Z][0-9]{9}\.c$", file_name, re.I)
+            print(file_name)
+            # matched_file = re.search(rf"^(.*)\.{code_lang}$", file_name, re.I)
+            if code_lang == "Java":
+                matched_file = re.match(r"^(.*)\.java$", file_name, re.I)
+            elif code_lang == "C":
+                matched_file = re.match(r"^(.*)\.c$", file_name, re.I)
+            elif code_lang == "OS":
+                matched_file = re.match(r"^(.*)\.(.*)$", file_name, re.I)
             if matched_file:
                 logging.info(f"Found {code_lang} file: {file_name} in {file_path}")
                 logging.info("Generated comments: " + get_comments(file_name, file_path, code_type, code_lang))
